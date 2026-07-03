@@ -12,11 +12,14 @@ import { createUserIfNeeded } from "./database";
 
 export const auth = getAuth(app);
 
-const googleProvider = new GoogleAuthProvider();
+const provider = new GoogleAuthProvider();
 
+provider.setCustomParameters({
+  prompt: "select_account",
+});
 export const signInWithGoogle = async () => {
   try {
-    const result = await signInWithPopup(auth, googleProvider);
+    const result = await signInWithPopup(auth, provider);
 
     await createUserIfNeeded({
       uid: result.user.uid,
