@@ -3,13 +3,16 @@
 import { Menu, Video, LogOut, ArrowUpRight, Settings } from "lucide-react";
 import { UserProfile } from "@/types";
 
+// This interface now maps exactly to your Firestore user collection schema
 interface HeaderProps {
   profile: UserProfile | null;
-  credits: {
-    remaining: number;
-    plan: string;
-    // Added reset/renewal string field to fit your SaaS look
-    resetDate?: string; 
+  userDocument: {
+    plan: string;             // "free", "creator", "pro"
+    planCredits: number;      // e.g., 250
+    bonusCredits: number;     // e.g., 0
+    usedCredits: number;      // e.g., 248
+    resetAt: number;          // Timestamp integer (ms) e.g., 1783613867894
+    subscriptionStatus: string; // "active", "inactive", etc.
   };
   sidebarOpen: boolean;
   setSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -26,16 +29,9 @@ interface HeaderProps {
   triggerSessionHardReset: () => void;
 }
 
-// Map plans to their respective total credits for progress bar math
-const PLAN_MAXIMA: Record<string, number> = {
-  free: 5,
-  creator: 80,
-  pro: 200, // Fallback assumption
-};
-
 export default function Header({
   profile,
-  credits,
+  userDocument,
   setSidebarOpen,
   PRESET_NICHES,
   editingCustomNiche,
@@ -46,12 +42,29 @@ export default function Header({
   triggerSessionHardReset,
 }: HeaderProps) {
   
-  const isFree = credits.plan === "free";
-  const planLabel = isFree ? "Free Plan" : credits.plan === "creator" ? "Creator Plan" : "Pro Plan";
-  const maxCredits = PLAN_MAXIMA[credits.plan] || 5;
+  // 1. Clean & Format Plan Type
+  const planType = userDocument.plan?.toLowerCase() || "free"; 
+  const isFree = planType === "free";
+  const planLabel = planType === "free" ? "Free Plan" : planType === "creator" ? "Creator Plan" : "Pro Plan";
   
-  // Calculate width percentage safely between 0 and 100
-  const percentage = Math.min(Math.max((credits.remaining / maxCredits) * 100, 0), 100);
+  // 2. Exact Credit Math from Firestore Fields
+  const maxCredits = (userDocument.planCredits || 0) + (userDocument.bonusCredits || 0);
+  const remaining = Math.max(maxCredits - (userDocument.usedCredits || 0), 0);
+
+  // 3. Dynamic Progress Bar Math
+  const percentage = maxCredits > 0 ? Math.min((remaining / maxCredits) * 100, 100) : 0;
+
+  // 4. Convert resetAt Millisecond Timestamp to human readable date string (e.g. "Aug 3")
+  const getRenewalText = () => {
+    if (!userDocument.resetAt) return isFree ? "Resets monthly" : "Renews automatically";
+    try {
+      const date = new Date(userDocument.resetAt);
+      const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return isFree ? `Resets ${formattedDate}` : `Renews ${formattedDate}`;
+    } catch (e) {
+      return "Renews soon";
+    }
+  };
 
   return (
     <header className="flex items-center justify-between p-4 rounded-2xl bg-[#0B132B]/30 backdrop-blur-md border border-white/5 shadow-2xl">
@@ -137,15 +150,14 @@ export default function Header({
         )}
       </div>
 
-      {/* Premium Credits & Controls Interface */}
+      {/* Premium Credits SaaS Interface */}
       <div className="flex items-center gap-4">
         
-        {/* SaaS Dashboard Credit Component */}
-        <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-[#090D16]/60 border border-white/5 min-w-[200px]">
+        <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-[#090D16]/60 border border-white/5 min-w-[210px]">
           <div className="flex items-center justify-between text-xs font-bold text-gray-200">
             <span>{planLabel}</span>
             <span className="text-gray-400 font-medium">
-              <strong className="text-white">{credits.remaining}</strong> / {maxCredits} <span className="text-[10px] text-gray-500">Credits</span>
+              <strong className="text-white">{remaining}</strong> / {maxCredits} <span className="text-[10px] text-gray-500">Credits</span>
             </span>
           </div>
 
@@ -159,7 +171,7 @@ export default function Header({
 
           <div className="flex items-center justify-between gap-2 mt-0.5">
             <span className="text-[10px] text-gray-500 font-medium">
-              {credits.resetDate || (isFree ? "Resets in 6 days" : "Renews Aug 3")}
+              {getRenewalText()}
             </span>
 
             {isFree ? (
@@ -176,7 +188,7 @@ export default function Header({
           </div>
         </div>
 
-        {/* Terminate Session Action */}
+        {/* Terminate Session Button */}
         <button
           onClick={triggerSessionHardReset}
           className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all self-center"
