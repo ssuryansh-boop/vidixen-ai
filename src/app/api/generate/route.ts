@@ -96,10 +96,16 @@ Ensure maximum clean vertical spacing. Make the layout look remarkably sharp, sy
       return NextResponse.json({ error: `Upstream Processing Fault: ${errorText}` }, { status: response.status });
     }
 
-    const payload = await response.json();
-    const rawAiText = payload.candidates[0].content.parts[0].text;
-await consumeCredit(uid);
-    const updatedCredits = await canUseCredit(uid);
+   const payload = await response.json();
+const rawAiText = payload.candidates[0].content.parts[0].text;
+
+// Only AI chat requests consume credits.
+// Background trend loading is free.
+if (systemMode === "chat") {
+  await consumeCredit(uid);
+}
+
+const updatedCredits = await canUseCredit(uid);
 
 return NextResponse.json({
   result: rawAiText,
