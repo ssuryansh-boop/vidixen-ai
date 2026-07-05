@@ -32,30 +32,35 @@ export function useDashboard() {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [saveStatusIndex, setSaveStatusIndex] = useState<number | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
-const [credits, setCredits] = useState({
-  remaining: 5,
-  plan: "free",
-});
-const loadCredits = async () => {
-  const token = await auth.currentUser?.getIdToken();
-
-  if (!token) return;
-
-  const response = await fetch("/api/credits", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+  
+  const [credits, setCredits] = useState({
+    remaining: 5,
+    plan: "free",
   });
+  
+  const [checkoutLoading, setCheckoutLoading] = useState(false); // New checkout loading indicator
 
-  if (!response.ok) return;
+  const loadCredits = async () => {
+    const token = await auth.currentUser?.getIdToken();
 
-  const data = await response.json();
+    if (!token) return;
 
-  setCredits({
-    remaining: data.remaining,
-    plan: data.plan,
-  });
-};
+    const response = await fetch("/api/credits", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) return;
+
+    const data = await response.json();
+
+    setCredits({
+      remaining: data.remaining,
+      plan: data.plan,
+    });
+  };
+
   useEffect(() => {
     if (profile) {
       const randomPicker = GREETING_VARIANTS[Math.floor(Math.random() * GREETING_VARIANTS.length)];
@@ -169,17 +174,20 @@ const loadCredits = async () => {
       const data = await response.json();
       if (!response.ok) {
         if (data.code === "NO_CREDITS") {
-          alert("🎉 Your free trial has ended. Upgrade to continue.");
-          return;
-        }
+    await triggerDodoCheckout(
+    process.env.NEXT_PUBLIC_DODO_INDIA_PRO_PRODUCT_ID,
+    "IN"
+);
+    return;
+}
         throw new Error(data.error || "Generation failed.");
       }
       if (typeof data.remainingCredits === "number") {
-  setCredits((prev) => ({
-  ...prev,
-  remaining: data.remainingCredits,
-}));
-}
+        setCredits((prev) => ({
+          ...prev,
+          remaining: data.remainingCredits,
+        }));
+      }
       const aiResponse: ChatMessage = {
         role: "model",
         text: data.result,
@@ -228,17 +236,20 @@ const loadCredits = async () => {
       const data = await response.json();
       if (!response.ok) {
         if (data.code === "NO_CREDITS") {
-          alert("🎉 Your free trial has ended. Upgrade to continue.");
-          return;
-        }
+    await triggerDodoCheckout(
+    process.env.NEXT_PUBLIC_DODO_INDIA_PRO_PRODUCT_ID,
+    "IN"
+);
+    return;
+}
         throw new Error(data.error || "Generation failed.");
       }
       if (typeof data.remainingCredits === "number") {
-  setCredits((prev) => ({
-  ...prev,
-  remaining: data.remainingCredits,
-}));
-}
+        setCredits((prev) => ({
+          ...prev,
+          remaining: data.remainingCredits,
+        }));
+      }
       setMessages([
         ...nextStack,
         {
@@ -314,8 +325,45 @@ const loadCredits = async () => {
     logOut();
   };
 
+  // 🔥 NEW FEATURE: Automated Live Checkout Redirect Pipeline
+  const triggerDodoCheckout = async (productId: string | undefined, regionCode: 'IN' | 'US') => {
+    if (!user || !user.email) {
+      alert("Please log in to purchase an upgraded plan.");
+      return;
+    }
+    if (!productId) {
+      alert("Configuration error: Selected product identifier is blank.");
+      return;
+    }
+
+    setCheckoutLoading(true);
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: productId,
+          countryCode: regionCode,
+          customerEmail: user.email, // Automatically passes current authenticated email
+        }),
+      });
+
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url; // Takes them to your live subscription portal
+      } else {
+        alert(data.error || "Failed to setup checkout pipeline.");
+      }
+    } catch (error) {
+      console.error("Dodo automated link generation failed:", error);
+      alert("Network exception establishing payment interface.");
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
   return {
-    credits,setCredits,user, authLoading, profile, onboardingStep, setOnboardingStep,
+    credits, setCredits, user, authLoading, profile, onboardingStep, setOnboardingStep,
     inputName, setInputName, inputNiche, setInputNiche,
     customNicheMode, setCustomNicheMode, editingCustomNiche, setEditingCustomNiche,
     customNicheValue, setCustomNicheValue, sidebarOpen, setSidebarOpen,
@@ -326,6 +374,7 @@ const loadCredits = async () => {
     saveStatusIndex, setSaveStatusIndex, chatEndRef,
     saveOnboardingProfile, reloadHistoricalVault, runAutomatedChannelAnalysis,
     triggerTrendSignalIdeation, executeCustomChatMessageInput, commitScriptToCloudVault,
-    modifyActiveProfileNiche, triggerSessionHardReset
+    modifyActiveProfileNiche, triggerSessionHardReset,
+    triggerDodoCheckout, checkoutLoading // Passed down to safely manage click states
   };
 }

@@ -21,12 +21,41 @@ export async function getUserCredits(uid: string) {
     }
 
    if (user.plan === "creator") {
-    user.planCredits = 80;
-    user.resetAt = Date.now() + MONTH;
+  switch (user.subscriptionPlanId) {
+    // India Creator
+    case process.env.DODO_INDIA_CREATOR_PRODUCT_ID:
+      user.planCredits = 75;
+      break;
+
+    // Global Creator
+    case process.env.DODO_GLOBAL_CREATOR_PRODUCT_ID:
+      user.planCredits = 100;
+      break;
+
+    default:
+      user.planCredits = 75;
+  }
+
+  user.resetAt = Date.now() + MONTH;
 }
-    if (user.plan === "pro") {
-    user.planCredits = 200;
-    user.resetAt = Date.now() + MONTH;
+
+if (user.plan === "pro") {
+  switch (user.subscriptionPlanId) {
+    // India Pro
+    case process.env.DODO_INDIA_PRO_PRODUCT_ID:
+      user.planCredits = 200;
+      break;
+
+    // Global Pro
+    case process.env.DODO_GLOBAL_PRO_PRODUCT_ID:
+      user.planCredits = 350;
+      break;
+
+    default:
+      user.planCredits = 200;
+  }
+
+  user.resetAt = Date.now() + MONTH;
 }
 
     changed = true;

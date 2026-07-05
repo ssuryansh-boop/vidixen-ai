@@ -35,7 +35,9 @@ export interface UserAccount {
 
   resetAt: number;
   subscriptionEnd: number | null;
-
+dodoCustomerId?: string;
+  dodoSubscriptionId?: string;
+  subscriptionPlanId?: string;
   createdAt: any;
   updatedAt: any;
 }
@@ -86,6 +88,9 @@ export async function createUserIfNeeded(user: {
     resetAt: nextWeek,
 
     subscriptionEnd: null,
+    dodoCustomerId: "",
+dodoSubscriptionId: "",
+subscriptionPlanId: "",
 
     createdAt: serverTimestamp(),
 

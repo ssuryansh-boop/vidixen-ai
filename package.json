@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "clsx": "^2.1.1",
+    "dodopayments": "^2.41.0",
     "firebase": "^12.15.0",
     "firebase-admin": "^13.5.0",
     "framer-motion": "^12.42.0",
