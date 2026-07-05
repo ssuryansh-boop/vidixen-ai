@@ -3,7 +3,7 @@ import DodoPayments from 'dodopayments';
 
 const client = new DodoPayments({
   bearerToken: process.env.DODO_API_KEY,
-  environment: 'live_mode', 
+  environment: 'test_mode', 
 });
 
 export async function POST(request: Request) {

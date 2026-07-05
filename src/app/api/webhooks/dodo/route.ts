@@ -8,15 +8,15 @@ export const POST = Webhooks({
     console.log("========== DODO EVENT ==========");
     console.log(payload.type);
 
-    // We only care about successful purchases for now
-    if (
-      payload.type !== "payment.succeeded" &&
-      payload.type !== "subscription.active"
-    ) {
+    // Only handle subscription activation
+    if (payload.type !== "subscription.active") {
       return;
     }
 
-    const email = payload.data.customer?.email;
+    // Tell TypeScript this is a Subscription payload
+    const data = payload.data as any;
+
+    const email = data.customer?.email;
 
     if (!email) {
       console.log("No customer email found.");
@@ -38,9 +38,49 @@ export const POST = Webhooks({
 
     const userDoc = snapshot.docs[0];
 
-    console.log("FOUND USER:");
-    console.log(userDoc.id);
+    const productId = data.product_id;
 
-    console.log(userDoc.data());
+    let plan: "free" | "creator" | "pro" = "free";
+    let credits = 5;
+
+    // India Creator
+    if (productId === process.env.NEXT_PUBLIC_DODO_CREATOR_IN_ID) {
+      plan = "creator";
+      credits = 75;
+    }
+
+    // India Pro
+    if (productId === process.env.NEXT_PUBLIC_DODO_PRO_CREATOR_IN_ID) {
+      plan = "pro";
+      credits = 200;
+    }
+
+    // Global Creator
+    if (productId === process.env.NEXT_PUBLIC_DODO_CREATOR_GL_ID) {
+      plan = "creator";
+      credits = 100;
+    }
+
+    // Global Pro
+    if (productId === process.env.NEXT_PUBLIC_DODO_PRO_CREATOR_GL_ID) {
+      plan = "pro";
+      credits = 350;
+    }
+
+    await userDoc.ref.update({
+      plan,
+      subscriptionStatus: "active",
+      planCredits: credits,
+      usedCredits: 0,
+      resetAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
+
+      dodoCustomerId: data.customer.customer_id,
+      dodoSubscriptionId: data.subscription_id,
+      subscriptionPlanId: productId,
+    });
+
+    console.log("✅ User upgraded successfully");
+    console.log("Plan:", plan);
+    console.log("Credits:", credits);
   },
 });
