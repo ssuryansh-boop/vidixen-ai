@@ -1,16 +1,9 @@
-import { NextResponse } from "next/server";
+import { Webhooks } from "@dodopayments/nextjs";
 
-export async function POST(req: Request) {
-  const body = await req.text();
+export const POST = Webhooks({
+  webhookKey: process.env.DODO_WEBHOOK_SECRET!,
 
-  console.log("========== HEADERS ==========");
-
-  for (const [key, value] of req.headers.entries()) {
-    console.log(key, value);
-  }
-
-  console.log("========== BODY ==========");
-  console.log(body);
-
-  return NextResponse.json({ ok: true });
-}
+  onPayload: async (payload) => {
+    console.log(payload);
+  },
+});

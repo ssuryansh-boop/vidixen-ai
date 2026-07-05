@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@dodopayments/nextjs": "^0.3.6",
     "clsx": "^2.1.1",
     "dodopayments": "^2.41.0",
     "firebase": "^12.15.0",
