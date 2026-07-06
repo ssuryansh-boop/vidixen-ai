@@ -39,7 +39,12 @@ export const POST = Webhooks({
     const userDoc = snapshot.docs[0];
 
     const productId = data.product_id;
+console.log("Purchased Product ID:", productId);
 
+console.log("Creator IN:", process.env.NEXT_PUBLIC_DODO_CREATOR_IN_ID);
+console.log("Pro IN:", process.env.NEXT_PUBLIC_DODO_PRO_CREATOR_IN_ID);
+console.log("Creator GL:", process.env.NEXT_PUBLIC_DODO_CREATOR_GL_ID);
+console.log("Pro GL:", process.env.NEXT_PUBLIC_DODO_PRO_CREATOR_GL_ID);
     let plan: "free" | "creator" | "pro" = "free";
     let credits = 5;
 
@@ -66,7 +71,10 @@ export const POST = Webhooks({
       plan = "pro";
       credits = 350;
     }
-
+console.log({
+  plan,
+  credits,
+}); 
     await userDoc.ref.update({
       plan,
       subscriptionStatus: "active",
