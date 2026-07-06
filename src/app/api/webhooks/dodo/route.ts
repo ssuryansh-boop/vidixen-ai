@@ -8,10 +8,15 @@ export const POST = Webhooks({
     console.log("========== DODO EVENT ==========");
     console.log(payload.type);
 
-    // Only handle subscription activation
-    if (payload.type !== "subscription.active") {
-      return;
-    }
+   // Handle only subscription events
+if (
+  payload.type !== "subscription.active" &&
+  payload.type !== "subscription.cancelled" &&
+  payload.type !== "subscription.expired" &&
+  payload.type !== "subscription.renewed"
+) {
+  return;
+}
 
     // Tell TypeScript this is a Subscription payload
     const data = payload.data as any;
@@ -37,6 +42,38 @@ export const POST = Webhooks({
     }
 
     const userDoc = snapshot.docs[0];
+if (payload.type === "subscription.cancelled") {
+  await userDoc.ref.update({
+    subscriptionStatus: "inactive",
+  });
+
+  console.log("✅ Subscription cancelled");
+
+  return;
+}
+if (payload.type === "subscription.expired") {
+  await userDoc.ref.update({
+    plan: "free",
+    planCredits: 5,
+    usedCredits: 0,
+    subscriptionStatus: "inactive",
+    subscriptionEnd: null,
+  });
+
+  console.log("✅ Subscription expired");
+
+  return;
+}
+if (payload.type === "subscription.renewed") {
+  await userDoc.ref.update({
+    usedCredits: 0,
+    resetAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
+  });
+
+  console.log("✅ Subscription renewed");
+
+  return;
+}
 
     const productId = data.product_id;
 console.log("Purchased Product ID:", productId);
