@@ -2,6 +2,8 @@
 
 import { LogIn, Video } from 'lucide-react';
 import { signInWithGoogle } from '@/lib/auth';
+// Import Next.js Link for instant page rendering
+import Link from 'next/link';
 
 export default function AuthStep() {
   return (
@@ -26,7 +28,7 @@ export default function AuthStep() {
       </div>
 
       {/* Google Login */}
-      <div className="space-y-3 pt-4">
+      <div className="space-y-4 pt-4">
         <button
           onClick={signInWithGoogle}
           className="w-full py-4 px-6 rounded-2xl font-bold bg-gradient-to-r from-[#00F2FE] via-[#4FACFE] to-[#7F00FF] text-white flex items-center justify-center gap-3 shadow-xl hover:opacity-95 transition-all"
@@ -34,6 +36,14 @@ export default function AuthStep() {
           <LogIn className="w-5 h-5" />
           Secure Google Sign In
         </button>
+
+        {/* ⚖️ FIXED: Legal disclaimer added right beneath the Google button layout */}
+        <p className="text-[11px] text-gray-500 px-4 leading-relaxed max-w-sm mx-auto">
+          By clicking "Secure Google Sign In" to claim your 5 free credits, you instantly agree to our{' '}
+          <Link href="/terms" className="text-[#00F2FE] hover:underline">Terms of Service</Link>,{' '}
+          <Link href="/privacy" className="text-[#00F2FE] hover:underline">Privacy Policy</Link>, and accept our one-time{' '}
+          <Link href="/billing-policy" className="text-[#00F2FE] hover:underline">Billing Terms</Link>.
+        </p>
       </div>
     </div>
   );

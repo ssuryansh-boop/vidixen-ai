@@ -2,6 +2,17 @@ import { auth } from "@/lib/auth";
 import { TrendingSignal } from "@/types";
 import { getFallbackSignals } from "./helpers";
 
+// 🧠 Rotating list of perspective modifiers to force unique LLM outputs on every execution
+const ANGLE_MODIFIERS = [
+  "under-the-radar subculture anomalies and drama",
+  "hidden technical structural shifts and anomalies",
+  "recent viral case studies, controversies, and unexpected breakdowns",
+  "highly specific microneighborhood discussions and underground tactics",
+  "unconventional counter-intuitive strategies gaining sudden traction",
+  "highly actionable breaking hacks and workflow automation spikes",
+  "emerging terminology, meta concepts, and secret industry tools"
+];
+
 export async function syncLiveNicheSignals(
   niche: string
 ): Promise<TrendingSignal[]> {
@@ -15,6 +26,9 @@ export async function syncLiveNicheSignals(
       return getFallbackSignals(activeNiche);
     }
 
+    // ⚡ Pick a completely random angle context to force variable API outputs on reload
+    const randomAngle = ANGLE_MODIFIERS[Math.floor(Math.random() * ANGLE_MODIFIERS.length)];
+
     const response = await fetch("/api/generate", {
       method: "POST",
       headers: {
@@ -24,6 +38,8 @@ export async function syncLiveNicheSignals(
       body: JSON.stringify({
         systemMode: "trends",
         niche: activeNiche,
+        // 🔥 UPDATED: Injects dynamic seed context so your backend prompt stays completely fresh
+        randomSeedContext: randomAngle, 
       }),
     });
 

@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+// Import Next.js Link for lightning-fast page loading
+import Link from 'next/link';
 
 export default function AuthScreen() {
   const [isSignUp, setIsSignUp] = useState(true);
@@ -10,7 +12,7 @@ export default function AuthScreen() {
     e.preventDefault();
     
     if (isSignUp && !acceptedTerms) {
-      alert("Please accept the Privacy Policy and Terms of Service to create your account.");
+      alert("Please accept the Terms, Privacy Policy, and Billing Terms to create your account.");
       return;
     }
 
@@ -19,8 +21,10 @@ export default function AuthScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070B14] flex flex-col items-center justify-center p-6 font-sans">
-      <div className="w-full max-w-md bg-[#0E1626] border border-[#1E2E4A] rounded-2xl p-8 shadow-2xl">
+    <div className="min-h-screen bg-[#070B14] flex flex-col items-center justify-center p-6 font-sans relative">
+      
+      {/* Central Auth Container */}
+      <div className="w-full max-w-md bg-[#0E1626] border border-[#1E2E4A] rounded-2xl p-8 shadow-2xl z-10">
         
         {/* Header */}
         <div className="text-center mb-8">
@@ -64,20 +68,20 @@ export default function AuthScreen() {
                 id="legal-checkbox"
                 checked={acceptedTerms}
                 onChange={(e) => setAcceptedTerms(e.target.checked)}
-                className="mt-1 w-4 h-4 rounded border-slate-700 bg-[#131F35] accent-[#00F2FE]"
+                className="mt-1 w-4 h-4 cursor-pointer rounded border-slate-700 bg-[#131F35] accent-[#00F2FE]"
               />
-              <label htmlFor="legal-checkbox" className="text-xs text-slate-400 leading-relaxed">
+              <label htmlFor="legal-checkbox" className="text-xs text-slate-400 leading-relaxed cursor-pointer select-none">
                 I agree to the{" "}
-                <a href="/terms" className="text-[#00F2FE] hover:underline">Terms of Service</a>{" "}
-                and acknowledge the{" "}
-                <a href="/privacy" className="text-[#00F2FE] hover:underline">Privacy Policy</a>.
+                <Link href="/terms" className="text-[#00F2FE] hover:underline">Terms of Service</Link>,{" "}
+                <Link href="/privacy" className="text-[#00F2FE] hover:underline">Privacy Policy</Link>, and acknowledge the{" "}
+                <Link href="/billing-policy" className="text-[#00F2FE] hover:underline">Billing Terms</Link>.
               </label>
             </div>
           )}
 
           <button 
             type="submit" 
-            className="w-full py-3 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-[#00F2FE] to-[#4FACFE] text-white hover:opacity-90 transition-opacity shadow-lg pt-3"
+            className="w-full py-3 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-[#00F2FE] to-[#4FACFE] text-white hover:opacity-90 transition-opacity shadow-lg"
           >
             {isSignUp ? "Get My 3 Free Credits" : "Sign In to Workspace"}
           </button>
@@ -94,6 +98,20 @@ export default function AuthScreen() {
         </div>
 
       </div>
+
+      {/* 🛡️ Trust Footer Links at the Very Bottom */}
+      <div className="absolute bottom-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-slate-500 px-4 text-center">
+        <Link href="/about" className="hover:text-slate-300 transition-colors">About Us</Link>
+        <span className="text-slate-700 hidden sm:inline">•</span>
+        <Link href="/contact" className="hover:text-slate-300 transition-colors">Contact Us</Link>
+        <span className="text-slate-700 hidden sm:inline">•</span>
+        <Link href="/privacy" className="hover:text-slate-300 transition-colors">Privacy Policy</Link>
+        <span className="text-slate-700 hidden sm:inline">•</span>
+        <Link href="/terms" className="hover:text-slate-300 transition-colors">Terms & Conditions</Link>
+        <span className="text-slate-700 hidden sm:inline">•</span>
+        <Link href="/billing-policy" className="hover:text-slate-300 transition-colors">Billing Policy</Link>
+      </div>
+
     </div>
   );
 }

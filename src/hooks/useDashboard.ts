@@ -8,10 +8,29 @@ import { ChatMessage, SavedScript, TrendingSignal, UserProfile } from '@/types';
 import { PRESET_NICHES, GREETING_VARIANTS } from "@/lib/helpers";
 import { syncLiveNicheSignals } from "@/lib/trends";
 
+// 🛡️ MEMORY CACHE PIPE (Declaring these outside the hook keeps them alive during page navigation)
+let globalCachedTrends: TrendingSignal[] = [];
+let globalCachedNiche: string = "";
+
 export function useDashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  
+  // ⚡ FIXED INITIALIZATION: Reads local storage immediately so it NEVER blinks back to the default niche on tab close/reopen
+  const [profile, setProfile] = useState<UserProfile | null>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem("vidixen_profile");
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error("Failed to parse initial profile cache:", e);
+        }
+      }
+    }
+    return null;
+  });
+
   const [onboardingStep, setOnboardingStep] = useState<'auth' | 'name' | 'niche' | 'complete'>('auth');
   const [inputName, setInputName] = useState('');
   const [inputNiche, setInputNiche] = useState('');
@@ -39,7 +58,7 @@ export function useDashboard() {
     plan: "free",
   });
   
-  const [checkoutLoading, setCheckoutLoading] = useState(false); // New checkout loading indicator
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const loadCredits = async () => {
     const token = await auth.currentUser?.getIdToken();
@@ -66,10 +85,16 @@ export function useDashboard() {
     if (profile) {
       const randomPicker = GREETING_VARIANTS[Math.floor(Math.random() * GREETING_VARIANTS.length)];
       setGreeting(randomPicker(profile.displayName));
-      setTrends([
-        { id: '1', topic: 'The Secret Algorithm Shift', velocity: 'Critical', hookAngle: 'What they updated at midnight...' },
-        { id: '2', topic: 'Automating Faceless Channels', velocity: 'Surging', hookAngle: 'Zero edit workflows revealed.' }
-      ]);
+      
+      if (globalCachedTrends.length > 0 && globalCachedNiche === profile.niche) {
+        setTrends(globalCachedTrends);
+      } else {
+        setTrends([
+          { id: '1', topic: 'The Secret Algorithm Shift', velocity: 'Critical', hookAngle: 'What they updated at midnight...' },
+          { id: '2', topic: 'Automating Faceless Channels', velocity: 'Surging', hookAngle: 'Zero edit workflows revealed.' }
+        ]);
+      }
+
       fetchArchivedScripts(profile.uid)
         .then(records => {
           if (records) setSavedScripts(records);
@@ -77,22 +102,36 @@ export function useDashboard() {
         .catch(console.error);
     }
   }, [profile]);
-useEffect(() => {
-  fetch("/api/country")
-    .then((res) => res.json())
-    .then((data) => setCountry(data.country))
-    .catch(() => setCountry("US"));
-}, []);
+
+  useEffect(() => {
+    fetch("/api/country")
+      .then((res) => res.json())
+      .then((data) => setCountry(data.country))
+      .catch(() => setCountry("US"));
+  }, []);
+
+  // ⚡ FIXED AUTH LISTENER: Preserves persistent niches correctly and prevents default fallback resets
   useEffect(() => {
     const unsubscribe = subscribeToAuthChanges(async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        localStorage.removeItem("vidixen_profile");
+        const localCache = localStorage.getItem("vidixen_profile");
+        let parsedProfile: UserProfile | null = null;
+
+        if (localCache) {
+          try {
+            parsedProfile = JSON.parse(localCache);
+          } catch (e) {
+            console.error(e);
+          }
+        }
+
         const loggedProfile: UserProfile = {
           uid: currentUser.uid,
-          displayName: currentUser.displayName || "Creator",
-          niche: PRESET_NICHES[0],
+          displayName: parsedProfile?.displayName || currentUser.displayName || "Creator",
+          niche: parsedProfile?.niche || PRESET_NICHES[0],
         };
+
         setProfile(loggedProfile);
         setInputName(loggedProfile.displayName);
         setInputNiche(loggedProfile.niche);
@@ -113,11 +152,19 @@ useEffect(() => {
     if (profile) {
       const randomPicker = GREETING_VARIANTS[Math.floor(Math.random() * GREETING_VARIANTS.length)];
       setGreeting(randomPicker(profile.displayName));
-      setTrendsLoading(true);
 
-      syncLiveNicheSignals(profile.niche)
-        .then(setTrends)
-        .finally(() => setTrendsLoading(false));
+      if (globalCachedTrends.length > 0 && globalCachedNiche === profile.niche) {
+        setTrends(globalCachedTrends);
+      } else {
+        setTrendsLoading(true);
+        syncLiveNicheSignals(profile.niche)
+          .then((fetchedData) => {
+            setTrends(fetchedData);
+            globalCachedTrends = fetchedData;
+            globalCachedNiche = profile.niche;
+          })
+          .finally(() => setTrendsLoading(false));
+      }
       reloadHistoricalVault();
     }
   }, [profile]);
@@ -179,10 +226,10 @@ useEffect(() => {
       });
       const data = await response.json();
       if (!response.ok) {
-       if (data.code === "NO_CREDITS") {
-  window.location.href = "/pricing";
-  return;
-}
+        if (data.code === "NO_CREDITS") {
+          window.location.href = "/pricing";
+          return;
+        }
         throw new Error(data.error || "Generation failed.");
       }
       if (typeof data.remainingCredits === "number") {
@@ -238,10 +285,10 @@ useEffect(() => {
       });
       const data = await response.json();
       if (!response.ok) {
-       if (data.code === "NO_CREDITS") {
-  window.location.href = "/pricing";
-  return;
-}
+        if (data.code === "NO_CREDITS") {
+          window.location.href = "/pricing";
+          return;
+        }
         throw new Error(data.error || "Generation failed.");
       }
       if (typeof data.remainingCredits === "number") {
@@ -304,17 +351,50 @@ useEffect(() => {
 
   const modifyActiveProfileNiche = async (newNiche: string) => {
     if (!profile) return;
-    const modifiedProfile = { ...profile, niche: newNiche };
+
+    const storedCache = localStorage.getItem("vidixen_profile");
+    let currentStoredName = profile.displayName;
+    
+    if (storedCache) {
+      try {
+        const parsed = JSON.parse(storedCache);
+        currentStoredName = parsed.displayName || profile.displayName;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    const modifiedProfile = { 
+      ...profile, 
+      displayName: currentStoredName,
+      niche: newNiche 
+    };
+    
     setProfile(modifiedProfile);
+    localStorage.setItem("vidixen_profile", JSON.stringify(modifiedProfile));
     setTrendsLoading(true);
 
     syncLiveNicheSignals(newNiche)
-      .then(setTrends)
+      .then((updatedData) => {
+        setTrends(updatedData);
+        globalCachedTrends = updatedData; 
+        globalCachedNiche = newNiche;     
+      })
       .finally(() => setTrendsLoading(false));
+
     await syncUserProfileToCloud(modifiedProfile);
   };
 
+  // ⚡ NEW FUNCTION: Processes manually typed input fields and synchronizes directly with Firestore
+  const saveCustomNiche = async () => {
+    if (!customNicheValue.trim()) return;
+    await modifyActiveProfileNiche(customNicheValue.trim());
+    setEditingCustomNiche(false);
+  };
+
   const triggerSessionHardReset = () => {
+    globalCachedTrends = []; 
+    globalCachedNiche = "";
     setConversationId(null);
     localStorage.removeItem("vidixen_profile");
     setProfile(null);
@@ -325,7 +405,6 @@ useEffect(() => {
     logOut();
   };
 
-  // 🔥 NEW FEATURE: Automated Live Checkout Redirect Pipeline
   const triggerDodoCheckout = async (productId: string | undefined, regionCode: 'IN' | 'US') => {
     if (!user || !user.email) {
       alert("Please log in to purchase an upgraded plan.");
@@ -344,13 +423,13 @@ useEffect(() => {
         body: JSON.stringify({
           productId: productId,
           countryCode: regionCode,
-          customerEmail: user.email, // Automatically passes current authenticated email
+          customerEmail: user.email,
         }),
       });
 
       const data = await response.json();
       if (data.url) {
-        window.location.href = data.url; // Takes them to your live subscription portal
+        window.location.href = data.url;
       } else {
         alert(data.error || "Failed to setup checkout pipeline.");
       }
@@ -374,7 +453,7 @@ useEffect(() => {
     saveStatusIndex, setSaveStatusIndex, chatEndRef,
     saveOnboardingProfile, reloadHistoricalVault, runAutomatedChannelAnalysis,
     triggerTrendSignalIdeation, executeCustomChatMessageInput, commitScriptToCloudVault,
-    modifyActiveProfileNiche, triggerSessionHardReset, country,
-    triggerDodoCheckout, checkoutLoading // Passed down to safely manage click states
+    modifyActiveProfileNiche, saveCustomNiche, triggerSessionHardReset, country,
+    triggerDodoCheckout, checkoutLoading
   };
 }
