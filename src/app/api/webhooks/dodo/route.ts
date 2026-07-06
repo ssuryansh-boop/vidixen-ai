@@ -41,36 +41,36 @@ export const POST = Webhooks({
     const productId = data.product_id;
 console.log("Purchased Product ID:", productId);
 
-console.log("Creator IN:", process.env.NEXT_PUBLIC_DODO_CREATOR_IN_ID);
-console.log("Pro IN:", process.env.NEXT_PUBLIC_DODO_PRO_CREATOR_IN_ID);
-console.log("Creator GL:", process.env.NEXT_PUBLIC_DODO_CREATOR_GL_ID);
-console.log("Pro GL:", process.env.NEXT_PUBLIC_DODO_PRO_CREATOR_GL_ID);
+console.log("Creator IN:",process.env.DODO_INDIA_CREATOR_PRODUCT_ID);
+console.log("Pro IN:", process.env.DODO_INDIA_PRO_PRODUCT_ID);
+console.log("Creator GL:", process.env.DODO_GLOBAL_CREATOR_PRODUCT_ID);
+console.log("Pro GL:", process.env.DODO_GLOBAL_PRO_PRODUCT_ID);
     let plan: "free" | "creator" | "pro" = "free";
     let credits = 5;
 
     // India Creator
-    if (productId === process.env.NEXT_PUBLIC_DODO_CREATOR_IN_ID) {
-      plan = "creator";
-      credits = 75;
-    }
+if (productId === process.env.DODO_INDIA_CREATOR_PRODUCT_ID) {
+  plan = "creator";
+  credits = 75;
+}
 
-    // India Pro
-    if (productId === process.env.NEXT_PUBLIC_DODO_PRO_CREATOR_IN_ID) {
-      plan = "pro";
-      credits = 200;
-    }
+// India Pro
+if (productId === process.env.DODO_INDIA_PRO_PRODUCT_ID) {
+  plan = "pro";
+  credits = 200;
+}
 
-    // Global Creator
-    if (productId === process.env.NEXT_PUBLIC_DODO_CREATOR_GL_ID) {
-      plan = "creator";
-      credits = 100;
-    }
+// Global Creator
+if (productId === process.env.DODO_GLOBAL_CREATOR_PRODUCT_ID) {
+  plan = "creator";
+  credits = 100;
+}
 
-    // Global Pro
-    if (productId === process.env.NEXT_PUBLIC_DODO_PRO_CREATOR_GL_ID) {
-      plan = "pro";
-      credits = 350;
-    }
+// Global Pro
+if (productId === process.env.DODO_GLOBAL_PRO_PRODUCT_ID) {
+  plan = "pro";
+  credits = 350;
+}
 console.log({
   plan,
   credits,
