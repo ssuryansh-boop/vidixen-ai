@@ -173,12 +173,9 @@ export function useDashboard() {
       });
       const data = await response.json();
       if (!response.ok) {
-        if (data.code === "NO_CREDITS") {
-    await triggerDodoCheckout(
-    process.env.NEXT_PUBLIC_DODO_INDIA_PRO_PRODUCT_ID,
-    "IN"
-);
-    return;
+       if (data.code === "NO_CREDITS") {
+  window.location.href = "/pricing";
+  return;
 }
         throw new Error(data.error || "Generation failed.");
       }
@@ -235,12 +232,9 @@ export function useDashboard() {
       });
       const data = await response.json();
       if (!response.ok) {
-        if (data.code === "NO_CREDITS") {
-    await triggerDodoCheckout(
-    process.env.NEXT_PUBLIC_DODO_INDIA_PRO_PRODUCT_ID,
-    "IN"
-);
-    return;
+       if (data.code === "NO_CREDITS") {
+  window.location.href = "/pricing";
+  return;
 }
         throw new Error(data.error || "Generation failed.");
       }

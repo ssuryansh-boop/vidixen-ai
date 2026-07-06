@@ -128,7 +128,10 @@ export default function Header({
 
       <div className="flex items-center gap-3">
 
-  <div className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#00F2FE]/10 to-[#7F00FF]/10 border border-[#00F2FE]/20">
+  <button
+  onClick={() => window.location.href = "/pricing"}
+  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#00F2FE]/10 to-[#7F00FF]/10 border border-[#00F2FE]/20 hover:border-[#00F2FE]/50 transition"
+>
     <div className="text-[10px] uppercase tracking-wider text-gray-500">
       Credits
     </div>
@@ -142,7 +145,7 @@ export default function Header({
        {planLabel}
       </span>
     </div>
-  </div>
+ </button>
 
   <button
     onClick={triggerSessionHardReset}
