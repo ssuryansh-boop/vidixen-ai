@@ -75,6 +75,9 @@ console.log({
   plan,
   credits,
 }); 
+console.log("productId =", productId);
+console.log("plan =", plan);
+console.log("credits =", credits);
     await userDoc.ref.update({
       plan,
       subscriptionStatus: "active",
@@ -86,7 +89,8 @@ console.log({
       dodoSubscriptionId: data.subscription_id,
       subscriptionPlanId: productId,
     });
-
+const updated = await userDoc.ref.get();
+console.log("Firestore after update:", updated.data());
     console.log("✅ User upgraded successfully");
     console.log("Plan:", plan);
     console.log("Credits:", credits);
