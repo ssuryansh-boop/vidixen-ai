@@ -31,6 +31,7 @@ export function useDashboard() {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [saveStatusIndex, setSaveStatusIndex] = useState<number | null>(null);
+  const [country, setCountry] = useState("US");
   const chatEndRef = useRef<HTMLDivElement>(null);
   
   const [credits, setCredits] = useState({
@@ -76,7 +77,12 @@ export function useDashboard() {
         .catch(console.error);
     }
   }, [profile]);
-
+useEffect(() => {
+  fetch("/api/country")
+    .then((res) => res.json())
+    .then((data) => setCountry(data.country))
+    .catch(() => setCountry("US"));
+}, []);
   useEffect(() => {
     const unsubscribe = subscribeToAuthChanges(async (currentUser) => {
       setUser(currentUser);
@@ -368,7 +374,7 @@ export function useDashboard() {
     saveStatusIndex, setSaveStatusIndex, chatEndRef,
     saveOnboardingProfile, reloadHistoricalVault, runAutomatedChannelAnalysis,
     triggerTrendSignalIdeation, executeCustomChatMessageInput, commitScriptToCloudVault,
-    modifyActiveProfileNiche, triggerSessionHardReset,
+    modifyActiveProfileNiche, triggerSessionHardReset, country,
     triggerDodoCheckout, checkoutLoading // Passed down to safely manage click states
   };
 }

@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { auth } from "@/lib/auth";
-
+import { useDashboard } from "@/hooks/useDashboard";
 export default function PricingPage() {
   const [loading, setLoading] = useState(false);
 
-  // Change this to true if you want to test India pricing.
-  // Later we'll detect this automatically.
-  const isIndia = true;
+  const { country } = useDashboard();
+
+const isIndia = country === "IN";
 
   async function startCheckout(
     productId: string | undefined,
@@ -54,7 +54,8 @@ export default function PricingPage() {
       setLoading(false);
     }
   }
-
+const creatorPrice = isIndia ? "₹249/month" : "$9.99/month";
+const proPrice = isIndia ? "₹599/month" : "$29.99/month";
   return (
     <main className="min-h-screen bg-[#090D16] text-white flex items-center justify-center p-8">
 
@@ -77,7 +78,9 @@ export default function PricingPage() {
             <h2 className="text-3xl font-bold">
               Creator
             </h2>
-
+<div className="text-4xl font-black mt-4">
+  {creatorPrice}
+</div>
             <p className="mt-4 text-gray-400">
               Perfect for growing creators.
             </p>
@@ -114,7 +117,9 @@ export default function PricingPage() {
             <h2 className="text-3xl font-bold">
               Pro
             </h2>
-
+<div className="text-4xl font-black mt-4">
+  {proPrice}
+</div>
             <p className="mt-4 text-gray-400">
               Unlimited creative power.
             </p>
