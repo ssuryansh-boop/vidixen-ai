@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Vidixen AI",
-  description: "Made for creators, Reverse-engineer viral channels, track live niche trends, and generate high-retention video scripts in seconds.",
+  title: "Vidixen AI | Ultra-Premium AI Scriptwriter for Creators",
+  description: "Reverse-engineer viral channels, track live niche trends, and generate high-retention video scripts in seconds.",
 };
 
 export default function RootLayout({
