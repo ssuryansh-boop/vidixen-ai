@@ -4,7 +4,8 @@ import { useDashboard } from '@/hooks/useDashboard';
 import { PRESET_NICHES } from "@/lib/helpers";
 import { Sparkles, Loader2, Send, Copy, Check, FolderHeart, Video } from 'lucide-react';
 import Link from 'next/link';
-
+import logoIcon from './icon.png';
+import Image from 'next/image';
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import Onboarding from "@/components/onboarding/Onboarding";
@@ -99,14 +100,23 @@ export default function Home() {
                     </form>
 
                     {/* Chat Messages Frame */}
-                    <div className="flex-1 overflow-y-auto space-y-4 pr-1 mb-4 custom-scrollbar">
-                      {messages.length === 0 ? (
-                        <div className="h-full flex flex-col items-center justify-center text-center p-6 text-gray-500">
-                          <Sparkles className="w-8 h-8 text-[#00F2FE]/20 mb-2 animate-pulse" />
-                          <p className="text-xs font-bold text-gray-400">Vidixen Real-Time Dialogue Deck</p>
-                          <p className="text-[11px] text-gray-600 max-w-xs mt-1 leading-normal">Enter a target handle above to trigger automated deep-dives, or chat manually regarding multi-character dynamic configurations.</p>
-                        </div>
-                      ) : (
+<div className="flex-1 overflow-y-auto space-y-4 pr-1 mb-4 custom-scrollbar">
+  {messages.length === 0 ? (
+    <div className="h-full flex flex-col items-center justify-center text-center p-6 text-gray-500">
+      
+      {/* 🔮 REPLACED SPARKLES WITH YOUR PREMIUM LOGO */}
+      <Image 
+        src={logoIcon} 
+        alt="Vidixen Brand Emblem" 
+        width={48} 
+        height={48} 
+        className="mb-3 animate-pulse opacity-90"
+      />
+      
+      <p className="text-xs font-bold text-gray-400">Vidixen Real-Time Dialogue Deck</p>
+      <p className="text-[11px] text-gray-600 max-w-xs mt-1 leading-normal">Enter a target handle above to trigger automated deep-dives, or chat manually regarding multi-character dynamic configurations.</p>
+    </div>
+  ) : (
                         messages.map((msg, idx) => (
                           <div key={idx} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
                             <div className={`max-w-[90%] rounded-2xl p-4 text-xs leading-relaxed font-medium relative group ${msg.role === 'user' ? 'bg-[#7F00FF]/15 border border-[#7F00FF]/30 text-gray-200 rounded-tr-none' : 'bg-[#090D16]/80 border border-white/5 text-gray-300 rounded-tl-none whitespace-pre-wrap'}`}>
