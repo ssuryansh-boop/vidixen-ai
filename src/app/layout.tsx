@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Vidixen AI | Ultra-Premium AI Scriptwriter for Creators",
   description: "Reverse-engineer viral channels, track live niche trends, and generate high-retention video scripts in seconds.",
+  icons: {
+    icon: "/icon.png?v=1", // Adding '?v=1' breaks through the Vercel and browser cache instantly!
+  },
 };
 
 export default function RootLayout({
