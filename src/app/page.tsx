@@ -4,7 +4,7 @@ import { useDashboard } from '@/hooks/useDashboard';
 import { PRESET_NICHES } from "@/lib/helpers";
 import { Sparkles, Loader2, Send, Copy, Check, FolderHeart, Video } from 'lucide-react';
 import Link from 'next/link';
-import logoIcon from './icon.png';
+import logoIcon from './icon.jpeg';
 import Image from 'next/image';
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";

@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { Menu, Video, LogOut, Settings, X } from "lucide-react";
 import { UserProfile } from "@/types";
-
+import Image from 'next/image'; // 👈 ADD THIS IMPORT
+import logoIcon from '../app/icon.jpeg';
 interface HeaderProps {
   profile: UserProfile | null;
   credits: {
@@ -98,9 +99,16 @@ export default function Header({
             <Menu className="w-4 h-4" />
           </button>
 
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#7F00FF] to-[#E100FF] flex items-center justify-center">
-            <Video className="w-4 h-4" />
-          </div>
+          <div className="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center shrink-0">
+  <Image 
+    src={logoIcon} 
+    alt="Vidixen Brand Logo" 
+    width={36} 
+    height={36} 
+    className="object-cover"
+    priority
+  />
+</div>
 
           <span className="font-black text-lg tracking-tight bg-gradient-to-r from-white via-gray-300 to-gray-500 bg-clip-text text-transparent hidden sm:inline">
             VIDIXEN AI
