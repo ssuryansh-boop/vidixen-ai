@@ -89,8 +89,8 @@ export default function Header({
 
   return (
     <>
-      <header className="flex items-center justify-between p-4 rounded-2xl bg-[#0B132B]/30 backdrop-blur-md border border-white/5 shadow-2xl relative z-40">
-        <div className="flex items-center gap-3">
+      <header className="flex items-center justify-between p-4 rounded-2xl bg-[#0B132B]/30 backdrop-blur-md border border-white/5 shadow-2xl relative z-40 gap-4">
+        <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-2 rounded-xl bg-white/5 border border-white/5 text-gray-400 hover:text-white transition"
@@ -102,49 +102,53 @@ export default function Header({
             <Video className="w-4 h-4" />
           </div>
 
-          <span className="font-black text-lg tracking-tight bg-gradient-to-r from-white via-gray-300 to-gray-500 bg-clip-text text-transparent">
+          <span className="font-black text-lg tracking-tight bg-gradient-to-r from-white via-gray-300 to-gray-500 bg-clip-text text-transparent hidden sm:inline">
             VIDIXEN AI
           </span>
         </div>
 
-        {/* 🔥 NEW CLEAN NICHE SHOWCASE DESIGN */}
-        <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-xs font-semibold">
+        {/* 🛡️ data-nosnippet prevents custom creator focus niches from leaking into web crawl summaries */}
+        <div data-nosnippet className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-xs font-semibold max-w-xs truncate">
           <span className="text-gray-500">Core Focus:</span>
-          <span className="text-[#00F2FE] font-black tracking-wide uppercase px-1.5 py-0.5 rounded bg-[#00F2FE]/5 border border-[#00F2FE]/10">
+          <span className="text-[#00F2FE] font-black tracking-wide uppercase px-1.5 py-0.5 rounded bg-[#00F2FE]/5 border border-[#00F2FE]/10 truncate">
             {profile?.niche || "Not Configured"}
           </span>
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Action Controls Panel */}
+        <div className="flex items-center gap-2 sm:gap-3 ml-auto">
+          {/* 🛡️ data-nosnippet covers remaining wallet balance parameters from search scraper snippet generation */}
           <button
+            data-nosnippet
             onClick={() => (window.location.href = "/pricing")}
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#00F2FE]/10 to-[#7F00FF]/10 border border-[#00F2FE]/20 hover:border-[#00F2FE]/50 transition text-left"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-[#00F2FE]/10 to-[#7F00FF]/10 border border-[#00F2FE]/20 hover:border-[#00F2FE]/50 transition text-left"
           >
-            <div className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">
+            <div className="text-[9px] uppercase tracking-wider text-gray-500 font-bold">
               Credits
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-white font-black text-sm">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="text-white font-black text-xs sm:text-sm">
                 {credits.remaining}
               </span>
-              <span className="text-[10px] text-[#00F2FE] uppercase font-bold">
+              <span className="text-[9px] text-[#00F2FE] uppercase font-bold">
                 {planLabel}
               </span>
             </div>
           </button>
 
-          {/* ⚙️ EDIT PROFILE TRIGGER BUTTON */}
+          {/* ⚙️ EDIT PROFILE TRIGGER BUTTON — shrink-0 preserves item geometry perfectly */}
           <button
             onClick={() => setIsModalOpen(true)}
-            className="p-2.5 rounded-xl bg-white/5 border border-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-all"
+            className="p-2.5 rounded-xl bg-white/5 border border-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-all shrink-0"
             title="Edit Profile Settings"
           >
             <Settings className="w-4 h-4" />
           </button>
 
+          {/* 🛑 SESSION HARD RESET ACTION TRIGGER — shrink-0 prevents mobile overflow squeezing */}
           <button
             onClick={triggerSessionHardReset}
-            className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all"
+            className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all shrink-0"
             title="Terminate Session Interface"
           >
             <LogOut className="w-4 h-4" />
