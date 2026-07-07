@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { User } from 'firebase/auth';
 import { auth, logOut, subscribeToAuthChanges } from "@/lib/auth";
-import { syncUserProfileToCloud, archiveScriptToCloud, fetchArchivedScripts } from '@/lib/database';
+import { syncUserProfileToCloud, archiveScriptToCloud, fetchArchivedScripts,getUser } from '@/lib/database';
 import { ChatMessage, SavedScript, TrendingSignal, UserProfile } from '@/types';
 import { PRESET_NICHES, GREETING_VARIANTS } from "@/lib/helpers";
 import { syncLiveNicheSignals } from "@/lib/trends";
@@ -126,18 +126,39 @@ export function useDashboard() {
           }
         }
 
-        const loggedProfile: UserProfile = {
-          uid: currentUser.uid,
-          displayName: parsedProfile?.displayName || currentUser.displayName || "Creator",
-          niche: parsedProfile?.niche || PRESET_NICHES[0],
-        };
+        const dbUser = await getUser(currentUser.uid);
 
-        setProfile(loggedProfile);
-        setInputName(loggedProfile.displayName);
-        setInputNiche(loggedProfile.niche);
-        localStorage.setItem("vidixen_profile", JSON.stringify(loggedProfile));
-        setOnboardingStep("complete");
-        await loadCredits();
+if (dbUser && dbUser.niche && dbUser.niche.trim() !== "") {
+  const loggedProfile: UserProfile = {
+    uid: currentUser.uid,
+    displayName:
+      dbUser.displayName ||
+      currentUser.displayName ||
+      "Creator",
+    niche: dbUser.niche,
+  };
+
+  setProfile(loggedProfile);
+  setInputName(loggedProfile.displayName);
+  setInputNiche(loggedProfile.niche);
+
+  localStorage.setItem(
+    "vidixen_profile",
+    JSON.stringify(loggedProfile)
+  );
+
+  setOnboardingStep("complete");
+} else {
+  setProfile(null);
+
+  setInputName(currentUser.displayName || "");
+
+  setInputNiche("");
+
+  setOnboardingStep("name");
+}
+
+await loadCredits();
       } else {
         setProfile(null);
         localStorage.removeItem("vidixen_profile");
@@ -184,6 +205,10 @@ export function useDashboard() {
     setProfile(assembledProfile);
     setOnboardingStep('complete');
     await syncUserProfileToCloud(assembledProfile);
+    localStorage.setItem(
+  "vidixen_profile",
+  JSON.stringify(assembledProfile)
+);
   };
 
   const reloadHistoricalVault = async () => {
