@@ -15,7 +15,7 @@ export default function ContactUs() {
             <div>
               <p className="text-xs text-slate-400 uppercase font-semibold tracking-wider">Email Address</p>
               <a href="mailto:support@vidixen.ai" className="text-sm text-white font-medium hover:text-[#00F2FE] transition-colors">
-                support@vidixen.ai
+                vidixenai@gmail.com
               </a>
             </div>
           </div>
